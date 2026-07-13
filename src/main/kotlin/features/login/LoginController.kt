@@ -50,4 +50,23 @@ class LoginController(private val call: ApplicationCall) {
             call.respond(HttpStatusCode.BadRequest, "Invalid password")
         }
     }
+
+    suspend fun performLogout(){
+        val authHeader = call.request.headers["Authorization"]
+        val token = authHeader?.removePrefix("Bearer ") ?: ""
+
+        if(token.isBlank()) {
+            call.respond(HttpStatusCode.BadRequest, "Token is blank")
+            return
+        }
+
+        // Видаляємо токен з бази даних
+        val isDeleted = Tokens.deleteToken(token)
+
+        if(isDeleted) {
+            call.respond(HttpStatusCode.OK, "Successfully logged out. Token Deleted")
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Token not found")
+        }
+    }
 }

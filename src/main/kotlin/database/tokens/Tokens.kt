@@ -2,7 +2,9 @@ package com.swipehome.database.tokens
 
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
@@ -25,6 +27,22 @@ object Tokens: Table("tokens") {
                 it[id_user] = tokenDTO.id_user
                 it[expires_at] = OffsetDateTime.parse(tokenDTO.expires_at)
             }
+        }
+    }
+
+    fun deleteToken(tokenToDelete: String): Boolean
+    {
+        return transaction {
+            // Видаляємо рядок де токен збігається з переданим
+            val deletedRows = Tokens.deleteWhere { Tokens.token eq tokenToDelete }
+            deletedRows > 0 // Поверне true, якщо видалить хоч один рядок
+        }
+    }
+
+    fun deleteExpiredTokens() {
+        transaction {
+            val now = OffsetDateTime.now()
+            Tokens.deleteWhere { Tokens.expires_at less now }
         }
     }
 
