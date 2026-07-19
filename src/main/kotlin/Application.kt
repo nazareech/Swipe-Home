@@ -1,5 +1,6 @@
 package com.swipehome
 
+import com.swipehome.features.images.configureImagesRouting
 import com.swipehome.features.login.configureLoginRouting
 import com.swipehome.features.properties.configurePropertiesRouting
 import com.swipehome.features.register.configureRegisterRouting
@@ -26,4 +27,7 @@ fun Application.rootModule() {
 
     // Налаштування роутингу для Свайпів
     configureSwipesRouting()
+
+    // Налаштування роутингу для завантаження та роздачі зображень оголошень
+    configureImagesRouting()
 }
