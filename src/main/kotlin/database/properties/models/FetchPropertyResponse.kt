@@ -32,6 +32,7 @@ data class PropertyResponse(
     val furniture: Boolean,
     val building_type: String,
     val status: String,
+    val images_map: Map<String, Boolean>? = null,
     //---
     val creates_at: String
 )

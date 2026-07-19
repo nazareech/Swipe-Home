@@ -102,6 +102,7 @@ class PropertiesController(private val call: ApplicationCall) {
             furniture = dto.furniture,
             building_type = dto.building_type,
             status = dto.status,
+            images_map = dto.images_map,
             creates_at = dto.created_at ?: ""
         )
     }

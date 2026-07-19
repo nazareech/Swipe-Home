@@ -2,8 +2,8 @@ package com.swipehome.database.properties
 
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.insert
-import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 // DTO для передачі даних
@@ -32,6 +32,29 @@ object PropertyImages : Table("property_image") {
             }
         }
     }
+
+    //
+    fun getImageInfo(serchImageId: Int): Pair<Int, String>? {
+        return transaction {
+            PropertyImages.selectAll()
+                .where{ id_image eq serchImageId }
+                // Повертаємо пару (id_property, image_url)
+                .map { it[id_property] to it[image_url] }
+                .singleOrNull()
+        }
+    }
+
+    // Видаляємо запис з бази даних
+    fun deleteImage(imageToDelete: Int): Boolean{
+        return transaction {
+            // deletWhere
+            val deleteRows = PropertyImages.deleteWhere { id_image eq imageToDelete }
+            deleteRows > 0
+        }
+    }
+
+
+
 
     // Отримати всі фото для квартири
     fun fetchImagesForProperty(searchPropertyId: Int): List<String>{

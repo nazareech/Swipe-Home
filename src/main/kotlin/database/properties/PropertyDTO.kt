@@ -22,6 +22,7 @@ data class PropertyDTO( // Додано слово data
     val furniture: Boolean,
     val building_type: String,
     val status: String,
+    val images_map: Map<String, Boolean>? = null,  // Список зображень
     val created_at: String? = null // БД згенерує сама
 )
 fun CreatePropertyRequest.toPropertyDTO(safeOwnerId: Int): PropertyDTO {
@@ -66,6 +67,7 @@ fun PropertyDTO.toCreatePropertyResponse(): CreatePropertyResponse {
         furniture = this.furniture,
         building_type = this.building_type,
         status = this.status,
+        images_map = this.images_map,
         creates_at = this.created_at ?: "" // Повертаємо час створення
     )
 }

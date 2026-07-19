@@ -106,27 +106,22 @@ object Properties: Table("properties") {
             // Пагінація — поділ списку на окремі частини
             query.limit(request.limit).offset(request.offset.toLong())
 
-            // Конвертація результату в DTO
-            query.map { row ->
-                PropertyDTO(
-                    id_property = row[id_property],
-                    id_owner = row[id_owner],
-                    title = row[title],
-                    description = row[description],
-                    localization = row[localization],
-                    price = row[price],
-                    area = row[area],
-                    rooms = row[rooms],
-                    category = row[category],
-                    subcategory = row[subcategory],
-                    parking = row[parking],
-                    pets_allowed = row[pets_allowed],
-                    elevator = row[elevator],
-                    furniture = row[furniture],
-                    building_type = row[building_type],
-                    status = row[status],
-                    created_at = row[created_at].toString()
-                )
+            val propertiesList = query.map { rowToDTO(it) }
+
+            val propertyIds = propertiesList.mapNotNull { it.id_property }
+
+            val imagesMap: Map<Int, Map<String, Boolean>> = if (propertyIds.isNotEmpty()) {
+                PropertyImages.selectAll()
+                    .where { PropertyImages.id_property inList propertyIds }
+                    .groupBy { it[PropertyImages.id_property] }
+                    .mapValues { (_, rows) ->
+                        rows.associate { it[PropertyImages.image_url] to it[PropertyImages.is_main] }
+                    }
+            } else {
+                emptyMap()
+            }
+            propertiesList.map { dto ->
+                dto.copy(images_map = imagesMap[dto.id_property] ?: emptyMap())
             }
         }
     }

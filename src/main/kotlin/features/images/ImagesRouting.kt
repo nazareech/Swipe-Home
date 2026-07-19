@@ -2,6 +2,7 @@ package com.swipehome.features.images
 
 import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticFiles
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import java.io.File
@@ -12,6 +13,11 @@ fun Application.configureImagesRouting() {
         post("/properties/images/upload") {
             val controller = ImagesController(call)
             controller.uploadImage()
+        }
+
+        delete("/properties/images/{id_image}") {
+            val controller = ImagesController(call)
+            controller.deleteImage()
         }
 
         // Ендпоінт для роздачі фотографій з сервера клієнтам

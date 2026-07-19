@@ -1,5 +1,6 @@
 package com.swipehome.features.images
 
+import com.swipehome.database.properties.Properties
 import com.swipehome.utils.TokenCheck
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
@@ -13,6 +14,7 @@ import com.swipehome.database.properties.PropertyImages
 import io.ktor.http.content.streamProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import java.io.File
 import java.util.UUID
 
@@ -52,15 +54,18 @@ class ImagesController(private val call: ApplicationCall) {
                     val originalName = part.originalFileName ?: "image.jpg"
                     val extension = File(originalName).extension.ifEmpty { "jpg" }
                     val uniqueName = "${UUID.randomUUID()}.$extension"
+                    // Зберігаємо в змінну відносний шлях, щоб клієнт міг його завантажити
                     savedFilesName = "/application-number-$propertyId/$uniqueName"
 
                     // Зберігаємо файл у папку "uploads" на сервері
                     val uploadDir = File("uploads")
                     if (!uploadDir.exists()) uploadDir.mkdirs() // Створюємо папку якщо її ще не існує
 
+                    // Створюємо підпапку для конкретного оголошення (Використовуємо конструкцію File(parent, child)
                     val ownDir = File("${uploadDir.absolutePath}/application-number-$propertyId")
                     if (!ownDir.exists()) ownDir.mkdirs()
 
+                    // Створюємо кінцевий файл
                     val file = File(ownDir, uniqueName)
 
                     // Записуємо байти у файл (безпечно для пам'ять через Dispotchers.IO)
@@ -90,6 +95,63 @@ class ImagesController(private val call: ApplicationCall) {
             call.respond(HttpStatusCode.Created, "Image $savedFilesName successfully uploaded")
         } else{
             call.respond(HttpStatusCode.BadRequest, "Missing id_property or image file")
+        }
+    }
+
+    suspend fun deleteImage(){
+        val authorization = call.request.headers["Authorization"]
+        val token = authorization?.removePrefix("Bearer") ?: ""
+        val currentUserId = TokenCheck.getIDByToken(token)
+
+        if(currentUserId == null){
+            call.respond(HttpStatusCode.Unauthorized, "Invalid or expired token")
+            return
+        }
+
+        // Отримуємо ID картинки з URL (/properties/images/5)
+        val imagesId = call.parameters["id_image"]?.toIntOrNull()
+        if(imagesId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Missing or invalid id_image")
+            return
+        }
+
+        // Шукаємо інфу про картинку в базі даних
+        val imageInfo = PropertyImages.getImageInfo(imagesId)
+        if(imageInfo == null) {
+            call.respond(HttpStatusCode.BadRequest, "Image not found in database")
+            return
+        }
+
+        val propertyId = imageInfo.first
+        val imageUrl = imageInfo.second
+
+        // Перевіряємо, чи цей корисувач власник квартири
+        // Використовуємо готовий метод з Properties
+        val property = Properties.fetchPropertiesByID(propertyId)
+
+        if(property == null || property.id_owner != currentUserId) {
+            call.respond(HttpStatusCode.BadRequest, "You don`t have permission to delete this image")
+            return
+        }
+
+        // Видаляємо файл з сервера
+        val relativePath = imageUrl.removePrefix("/")
+        val fileToDelete = File("uploads", relativePath)
+
+        if (fileToDelete.exists()) {
+            val isDeleted = fileToDelete.delete()
+            if(!isDeleted) {
+                // Якщо з якоїсь причини файл не видалився (наприклад, заблокований системою)
+                println("Warning: Could not delete physical file: ${fileToDelete.absolutePath}")
+            }
+        }
+
+        val dbDeleted = PropertyImages.deleteImage(imagesId)
+
+        if (dbDeleted) {
+           call.respond(HttpStatusCode.OK, "Image deleted successfully")
+        } else {
+            call.respond(HttpStatusCode.InternalServerError, "Failed to delete image from database")
         }
     }
 }
