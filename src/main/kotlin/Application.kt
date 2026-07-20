@@ -1,5 +1,6 @@
 package com.swipehome
 
+import com.swipehome.features.chats.configureChatsRouting
 import com.swipehome.features.images.configureImagesRouting
 import com.swipehome.features.login.configureLoginRouting
 import com.swipehome.features.properties.configurePropertiesRouting
@@ -30,4 +31,7 @@ fun Application.rootModule() {
 
     // Налаштування роутингу для завантаження та роздачі зображень оголошень
     configureImagesRouting()
+
+    // Налаштування роутингу для чатів
+    configureChatsRouting()
 }
