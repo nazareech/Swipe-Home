@@ -20,6 +20,9 @@ fun Application.rootModule() {
     // налаштування сереалізації (JSON)
     configureSerialization()
 
+    // налаштування WebSokets
+    configureSockets()
+
     // ініціалізація бази даних
     configureDatabases()
 

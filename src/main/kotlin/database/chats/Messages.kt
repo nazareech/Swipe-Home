@@ -1,6 +1,7 @@
 package com.swipehome.database.chats
 
 import com.swipehome.database.users.Users
+import com.swipehome.utils.CryptoUtils
 import io.ktor.http.ContentType
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
@@ -22,11 +23,14 @@ object Messages : Table("messages")  {
 
     // Збереження нового повідомлення
     fun insertMessage(chatId: Int, senderId: Int, textContent: String): MessageDTO? {
+        // Зашифровуємо повідомлення в базу даних
+        val encryptedContent = CryptoUtils.encrypt(textContent)
+
         return transaction {
             val insertStatement = Messages.insert {
                 it[id_chat] = chatId
                 it[id_sender] = senderId
-                it[content] = textContent
+                it[content] = encryptedContent
             }
 
             // Після збереження одразу читаємо його з бази, щоб повернути клієнту разом із id_message та часом
@@ -37,7 +41,8 @@ object Messages : Table("messages")  {
                     id_message = it[Messages.id_message],
                     id_chat = it[Messages.id_chat],
                     id_sender = it[Messages.id_sender],
-                    content = it[Messages.content],
+                    // Розшифровуємо повідомлення клієнту
+                    content = CryptoUtils.decrypt(it[Messages.content]),
                     sent_at = it[Messages.sent_at].toString()
                 )
             }

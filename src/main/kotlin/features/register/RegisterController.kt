@@ -37,7 +37,7 @@ class RegisterController(val call: ApplicationCall) {
                 email = registerReceivedRemote.email,
                 phone = registerReceivedRemote.phone,
                 is_verified_owner = registerReceivedRemote.is_verified_owner,
-                is_admin = registerReceivedRemote.is_admin
+                is_admin = registerReceivedRemote.is_admin,
             )
         )
 

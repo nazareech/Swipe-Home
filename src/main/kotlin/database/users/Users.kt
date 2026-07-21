@@ -2,9 +2,12 @@ package com.swipehome.database.users
 
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
+import java.time.OffsetDateTime
 
 object Users: Table("users") {
     val id_user = integer("id_user").autoIncrement()
@@ -15,6 +18,7 @@ object Users: Table("users") {
     val phone = varchar("phone", 25)
     val is_verified_owner = bool("is_verified_owner")
     val is_admin = bool("is_admin")
+    val last_seen = timestampWithTimeZone("last_seen").clientDefault { OffsetDateTime.now() }
 
     override val primaryKey = PrimaryKey(id_user)
 
@@ -29,6 +33,7 @@ object Users: Table("users") {
                 it[phone] = userDTO.phone
                 it[is_verified_owner] = userDTO.is_verified_owner
                 it[is_admin] = userDTO.is_admin
+                it[last_seen] = OffsetDateTime.now()
             }
             // Повертаємо щойно згенерований id_user
             insertStatement[Users.id_user]
@@ -47,8 +52,17 @@ object Users: Table("users") {
                     email = it[Users.email],
                     phone = it[Users.phone],
                     is_verified_owner = it[Users.is_verified_owner],
-                    is_admin = it[Users.is_admin]
+                    is_admin = it[Users.is_admin],
+                    last_seen = it[Users.last_seen].toString()
                 )
+            }
+        }
+    }
+
+    fun updateLastSeen(userId: Int) {
+        transaction {
+            Users.update ({ Users.id_user eq userId }) {
+                it[last_seen] = OffsetDateTime.now()
             }
         }
     }

@@ -26,6 +26,9 @@ dependencies {
 
     implementation(libs.ktor.serialization.json)
 
+    implementation(libs.server.websockets) // Для веб-сокету
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
+
 }

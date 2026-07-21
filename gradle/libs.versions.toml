@@ -15,6 +15,8 @@ exposed-jdbc = {module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "ex
 exposed-dao = {module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed"}
 exposed-javatime = { module = "org.jetbrains.exposed:exposed-java-time", version.ref = "exposed" }
 
+server-websockets = {module = "io.ktor:ktor-server-websockets-jvm", version.ref = "ktor" }
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
