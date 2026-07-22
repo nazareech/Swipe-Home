@@ -2,14 +2,16 @@ package com.swipehome.database.chats
 
 import com.swipehome.database.users.Users
 import com.swipehome.utils.CryptoUtils
-import io.ktor.http.ContentType
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import java.time.OffsetDateTime
 
 object Messages : Table("messages")  {
@@ -60,10 +62,34 @@ object Messages : Table("messages")  {
                         id_message = it[Messages.id_message],
                         id_chat = it[Messages.id_chat],
                         id_sender = it[Messages.id_sender],
-                        content = it[Messages.content],
+                        content = CryptoUtils.decrypt(it[Messages.content]),
                         sent_at = it[Messages.sent_at].toString()
                     )
                 }
+        }
+    }
+
+    //Редагування повідомлень
+    fun editMessage(messageId: Int, senderId: Int, newText: String): Boolean{
+        val encryptedContent = CryptoUtils.encrypt(newText)
+
+        return transaction {
+            val updatedRows = Messages.update ({
+                (Messages.id_message eq messageId) and (Messages.id_sender eq senderId)
+            }){
+                it[content] = encryptedContent
+            }
+            updatedRows > 0 // Повертаємо true, якщо запит успішно оновлений
+        }
+    }
+
+    //Видалення повідомлень
+    fun deleteMessage(messageId: Int, senderId: Int): Boolean{
+        return transaction {
+            val deletedRows = Messages.deleteWhere{
+                (Messages.id_message eq messageId) and (Messages.id_sender eq senderId)
+            }
+            deletedRows > 0 // Повертаємо true, якщо виконано видалення
         }
     }
 }

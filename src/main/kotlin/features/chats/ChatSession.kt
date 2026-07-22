@@ -1,6 +1,9 @@
 package com.swipehome.features.chats
 
+import com.swipehome.database.chats.WsEvent
 import io.ktor.server.websocket.DefaultWebSocketServerSession
+import io.ktor.websocket.Frame
+import kotlinx.serialization.json.Json
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
@@ -31,5 +34,22 @@ object ChatSessionManager {
     // Отримуємо всіх, хто зараз онлайн у конкретному чаті
     fun getConnection(chatId: Int): Set<Connection> {
         return activeChats[chatId] ?: emptySet()
+    }
+
+    // Метод для миттєвої розсилки подій
+    suspend fun broadcastEvent(chatId: Int, event: WsEvent) {
+        val connections = activeChats[chatId] ?: return
+
+        // Перетворюємо об'єкт подій на JSON-рядок
+        val jsonMessage = Json.encodeToString(event)
+
+        // Відправляємо кожному підключеному клієнту в цій кімнаті
+        connections.forEach { connection ->
+            try{
+                connection.session.send(Frame.Text(jsonMessage))
+            } catch (e: Exception){
+                println("Failed to send event to user ${connection.userId}: ${e.localizedMessage}")
+            }
+        }
     }
 }

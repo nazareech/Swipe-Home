@@ -1,11 +1,16 @@
 package com.swipehome.features.chats
 
+import com.swipehome.database.chats.ChatActions.*
+import com.swipehome.database.chats.ClientWsMessage
 import com.swipehome.database.chats.GlobalConnectionManager
 import com.swipehome.database.chats.Messages
+import com.swipehome.database.chats.WsEvent
 import com.swipehome.utils.TokenCheck
 import io.ktor.server.application.Application
+import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
@@ -32,6 +37,16 @@ fun Application.configureChatsRouting() {
         get("/chats/{id_chat}/history") {
             val controller = ChatsController(call)
             controller.getChatHistory()
+        }
+
+        put("/chats/{id_chat}/messages/{message_id}") {
+            val controller = ChatsController(call)
+            controller.editMessage()
+        }
+
+        delete("/chats/{id_chat}/messages/{message_id}") {
+            val controller = ChatsController(call)
+            controller.deleteMessage()
         }
 
         webSocket("/chats/{id_chat}/stream") {
@@ -70,22 +85,57 @@ fun Application.configureChatsRouting() {
                     if (frame is Frame.Text) {
                         val receivedText = frame.readText()
 
-                        // Зберігаємо повідомлення в базу даних
-                        val saveMessage = Messages.insertMessage(
-                            chatId = chatId,
-                            senderId = currentUserId,
-                            textContent = receivedText
-                        )
+                        // Парсимо JSON, який надіслав клієнт
+                        val clientMessage = try{
+                            Json.decodeFromString<ClientWsMessage>(receivedText)
+                        } catch (e: Exception){
+                            print("Invalid JSON received from client: $receivedText")
+                            continue // Пропускаємо, якщо клієнт надіслав щось незрозуміле
+                        }
 
-                        if (saveMessage != null) {
-                            // Перетворюємо збережений об'єкт (з ID та часом) назад у JSON
-                            val messageJson = Json.encodeToString(saveMessage)
+                        when (clientMessage.action){
+                            // Надіслав повідомлення
+                            SEND_MESSAGE -> {
+                                if(clientMessage.content.isNullOrBlank()) continue
 
-                            // Розсилаємо це повідомлення ВСІМ, хто зараз в онлайн у цьому чаті
-                            val activeConnections = ChatSessionManager.getConnection(chatId)
-                            activeConnections.forEach { activeConnection ->
-                                activeConnection.session.send(Frame.Text(messageJson))
+                                // Зберігаємо повідомлення в базу даних
+                                val saveMessage = Messages.insertMessage(
+                                    chatId = chatId,
+                                    senderId = currentUserId,
+                                    textContent = clientMessage.content
+                                )
+
+                                if (saveMessage != null) {
+                                    val event = WsEvent(
+                                        action = NEW,
+                                        id_message = saveMessage.id_message,
+                                        messages = saveMessage
+                                    )
+                                    ChatSessionManager.broadcastEvent(chatId = chatId, event = event)
+                                }
                             }
+                            // Почав друкувати
+                            TYPING -> {
+                                val event = WsEvent(
+                                    action = TYPING,
+                                    id_sender = currentUserId // Хто друкує
+                                )
+                                // Просто пересилаємо подію без запису в БД
+                                ChatSessionManager.broadcastEvent(chatId = chatId, event = event)
+                            }
+
+                            // Перестав друкувати
+                            STOP_TYPING -> {
+                                val event = WsEvent(
+                                    action = STOP_TYPING,
+                                    id_sender = currentUserId
+                                )
+                                ChatSessionManager.broadcastEvent(chatId = chatId, event = event)
+                            }
+
+                            NEW -> TODO()
+                            EDIT -> TODO()
+                            DELETE -> TODO()
                         }
                     }
                 }

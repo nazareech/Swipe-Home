@@ -14,7 +14,7 @@ object CryptoUtils {
     // Секретний ключ для AES-256 має містити РІВНО 32 байти (32 символи)
     // У реальному проєкті цей ключ НІКОЛИ не зберігають у коді,
     // а беруть зі змінних оточення: System.getenv("AES_SECRET_KEY")
-    private const val MY_SECRET_KEY_STRING = "SwipeHomeSuperSecretKey12345678900"
+    private const val MY_SECRET_KEY_STRING = "SwipeHomeSuperSecretKey123456789"
     private val secretKey = SecretKeySpec(MY_SECRET_KEY_STRING.toByteArray(Charsets.UTF_8), "AES")
 
     // Шифруємо повідомлення
