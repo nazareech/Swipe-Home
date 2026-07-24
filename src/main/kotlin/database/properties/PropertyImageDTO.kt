@@ -1,6 +1,7 @@
 package com.swipehome.database.properties
 
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.*
@@ -34,10 +35,10 @@ object PropertyImages : Table("property_image") {
     }
 
     //
-    fun getImageInfo(serchImageId: Int): Pair<Int, String>? {
+    fun getImageInfo(searchImageId: Int): Pair<Int, String>? {
         return transaction {
             PropertyImages.selectAll()
-                .where{ id_image eq serchImageId }
+                .where{ id_image eq searchImageId }
                 // Повертаємо пару (id_property, image_url)
                 .map { it[id_property] to it[image_url] }
                 .singleOrNull()
@@ -47,9 +48,23 @@ object PropertyImages : Table("property_image") {
     // Видаляємо запис з бази даних
     fun deleteImage(imageToDelete: Int): Boolean{
         return transaction {
-            // deletWhere
+            // deleteWhere
             val deleteRows = PropertyImages.deleteWhere { id_image eq imageToDelete }
             deleteRows > 0
+        }
+    }
+
+    fun changeStatusImage(propertyId: Int, idNewMainImage: Int): Boolean{
+        return transaction {
+            PropertyImages.update({(id_property eq propertyId) }){
+                it[is_main] = false
+            }
+            val updateRows = PropertyImages.update({
+                (id_property eq propertyId) and (id_image eq idNewMainImage)
+            }){
+                it[is_main] = true
+            }
+            updateRows > 0
         }
     }
 

@@ -12,5 +12,6 @@ class UserDTO(
     val phone: String,
     val is_verified_owner: Boolean,
     val is_admin: Boolean,
+    val created_at: String?= null,
     val last_seen: String? = null
     )

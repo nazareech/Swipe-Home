@@ -1,5 +1,7 @@
 package com.swipehome.database.properties
 
+import com.swipehome.database.properties.models.EditPropertyRequest
+import com.swipehome.database.properties.models.PropertyStatus
 import com.swipehome.database.swipes.Swipes
 import com.swipehome.features.properties.FetchPropertyRequest
 import org.jetbrains.exposed.v1.core.*
@@ -54,14 +56,7 @@ object Properties: Table("properties") {
 
     fun fetchPropertiesByID(searchIdProperty: Int): PropertyDTO? {
         return transaction {
-            val resultRow = Properties.selectAll().where { id_property eq searchIdProperty }.singleOrNull()
-            resultRow?.let { rowToDTO(it) }
-        }
-    }
-
-    fun fetchAllProperties() {
-        return transaction {
-            val resultRow = Properties.selectAll().singleOrNull()
+            val resultRow = Properties.selectAll().where { id_property eq searchIdProperty and (status eq (PropertyStatus.ACTIVE).toString()) }.singleOrNull()
             resultRow?.let { rowToDTO(it) }
         }
     }
@@ -138,6 +133,42 @@ object Properties: Table("properties") {
                 .where { (Swipes.id_user eq userID) and (Swipes.action eq "right") }
             // Мапимо результат у список DTO за допомогою твоєї готової функції rowToDTO
             query.map { row -> rowToDTO(row) }
+        }
+    }
+
+    fun changePropertyStatus(propertyId: Int, ownerId: Int, newStatus: PropertyStatus): Boolean {
+        return transaction {
+            val updatedRows = Properties.update ({
+                (id_property eq propertyId) and (id_owner eq ownerId)
+            }){
+                it[status] = newStatus.toString()
+            }
+            updatedRows > 0 // true, якщо успішно
+        }
+    }
+
+    fun editProperty(propertyId: Int, ownerId: Int, request: EditPropertyRequest): Boolean {
+        return transaction {
+            val updateRows = Properties.update ({
+                (Properties.id_property eq propertyId) and (Properties.id_owner eq ownerId)
+            }){
+                // оновлюємо поля, які не null y запиті
+                request.title?.let { titleValue -> it[title] = titleValue}
+                request.description?.let { descriptionValue -> it[description] = descriptionValue}
+                request.price?.let { priceValue -> it[price] = priceValue}
+                request.localization?.let { localizationValue -> it[localization] = localizationValue}
+                request.area?.let { areaValue -> it[area] = areaValue}
+                request.rooms?.let { roomsValue -> it[rooms] = roomsValue}
+                request.category?.let { categoryValue -> it[category] = categoryValue}
+                request.subcategory?.let { subcategoryValue -> it[subcategory] = subcategoryValue}
+                request.parking?.let { parkingValue -> it[parking] = parkingValue}
+                request.pets_allowed?.let { pets_allowedValue -> it[pets_allowed] = pets_allowedValue}
+                request.elevator?.let { elevatorValue -> it[elevator] = elevatorValue}
+                request.furniture?.let { furnitureValue -> it[furniture] = furnitureValue}
+                request.building_type?.let {building_typeValue -> it[building_type] = building_typeValue  }
+                request.status?.let { stausValue -> it[status] = stausValue }
+            }
+            updateRows > 0
         }
     }
 

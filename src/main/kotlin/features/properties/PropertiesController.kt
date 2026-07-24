@@ -3,8 +3,11 @@ package com.swipehome.features.properties
 import com.swipehome.database.properties.Properties
 import com.swipehome.database.properties.PropertyDTO
 import com.swipehome.database.properties.models.CreatePropertyRequest
+import com.swipehome.database.properties.models.EditPropertyRequest
 import com.swipehome.database.properties.models.FetchPropertyResponse
 import com.swipehome.database.properties.models.PropertyResponse
+import com.swipehome.database.properties.models.PropertyStatus
+import com.swipehome.database.properties.models.UpdatePropertyStatusRequest
 import com.swipehome.database.properties.toPropertyDTO
 import com.swipehome.utils.TokenCheck
 import io.ktor.http.HttpStatusCode
@@ -105,5 +108,43 @@ class PropertiesController(private val call: ApplicationCall) {
             images_map = dto.images_map,
             creates_at = dto.created_at ?: ""
         )
+    }
+
+    suspend fun changeStatus(){
+        val authHeader = call.request.headers["Authorization"]
+        val token = authHeader?.removePrefix("Bearer ") ?: ""
+        val currentUserId = TokenCheck.getIDByToken(token) ?: return call.respond(HttpStatusCode.Unauthorized, "Invalid or expired token")
+
+        val propertyId = call.parameters["id"]?.toIntOrNull() ?: return call.respond(HttpStatusCode.BadRequest, "Invalid property ID")
+        val request = call.receive<UpdatePropertyStatusRequest>()
+
+        // Валідація статусу
+        if (request.status !in PropertyStatus.values()) {
+            return call.respond(HttpStatusCode.BadRequest, "Invalid status")
+        }
+
+        val success = Properties.changePropertyStatus(propertyId = propertyId, ownerId = currentUserId, newStatus = request.status)
+
+        if (success) {
+            call.respond(HttpStatusCode.OK, "message" to "Status updated to ${request.status}")
+        } else  {
+            call.respond(HttpStatusCode.Forbidden, "Property not found or you are not the owner")
+        }
+    }
+
+    suspend fun editProperty(){
+        val token = call.request.headers["Authorization"]?.removePrefix("Bearer ") ?: ""
+        val currentUserId = TokenCheck.getIDByToken(token) ?: return call.respond(HttpStatusCode.Unauthorized, "Invalid or expired token")
+
+        val propertyId = call.parameters["id"]?.toIntOrNull() ?: return call.respond(HttpStatusCode.BadRequest, "Invalid property ID")
+        val request = call.receive<EditPropertyRequest>()
+
+        val success = Properties.editProperty(propertyId, currentUserId, request)
+
+        if (success) {
+            call.respond(HttpStatusCode.OK, "message" to "Property updated successfully")
+        } else  {
+            call.respond(HttpStatusCode.Forbidden, "Property not found or you are not the owner")
+        }
     }
 }

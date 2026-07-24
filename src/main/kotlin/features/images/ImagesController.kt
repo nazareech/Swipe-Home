@@ -11,10 +11,12 @@ import io.ktor.server.response.respond
 
 import com.swipehome.database.properties.PropertyImageDTO
 import com.swipehome.database.properties.PropertyImages
+import com.swipehome.database.properties.models.UpdatePropertyMainImageRequest
+import com.swipehome.database.properties.models.UpdatePropertyStatusRequest
 import io.ktor.http.content.streamProvider
+import io.ktor.server.request.receive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import java.io.File
 import java.util.UUID
 
@@ -85,6 +87,14 @@ class ImagesController(private val call: ApplicationCall) {
         //Перевіряємо, чи отримали все необхідне
         if (propertyId != null && savedFilesName != null) {
 
+            // Перевірка, чи належить ця квартира поточному користувачеві
+            val property = Properties.fetchPropertiesByID(propertyId!!)
+            if (property == null || property.id_owner != currentUserId) {
+                File("uploads", savedFilesName!!).delete()
+                call.respond(HttpStatusCode.Forbidden, "You don`t have permission to upload images for this property")
+                return
+            }
+
             val dto = PropertyImageDTO(
                 id_property = propertyId!!,
                 image_url = savedFilesName!!, // Зберігаємо тільки ім'я файлу
@@ -152,6 +162,38 @@ class ImagesController(private val call: ApplicationCall) {
            call.respond(HttpStatusCode.OK, "Image deleted successfully")
         } else {
             call.respond(HttpStatusCode.InternalServerError, "Failed to delete image from database")
+        }
+    }
+
+    suspend fun changeMainImage(){
+        val authorization = call.request.headers["Authorization"]
+        val token = authorization?.removePrefix("Bearer ") ?: ""
+        val currentUserId = TokenCheck.getIDByToken(token)
+
+        if(currentUserId == null){
+            call.respond(HttpStatusCode.Unauthorized, "Invalid or expired token")
+            return
+        }
+        val propertyId = call.parameters["id_property"]?.toIntOrNull() ?: return call.respond(HttpStatusCode.BadRequest, "Invalid property ID")
+        val newImageId = call.parameters["id_new_image"]?.toIntOrNull()
+
+        if(newImageId == null || propertyId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Missing or invalid property ID or new image ID")
+            return
+        }
+
+        val property = Properties.fetchPropertiesByID(propertyId)
+        if (property == null || property.id_owner != currentUserId) {
+            call.respond(HttpStatusCode.BadRequest, "You don`t have permission to change this image")
+            return
+        }
+
+        val success = PropertyImages.changeStatusImage(propertyId, newImageId)
+
+        if (success) {
+            call.respond(HttpStatusCode.OK, mapOf( "message" to "Main image changed successfully"))
+        } else  {
+            call.respond(HttpStatusCode.Forbidden, "Image not found or you are not the owner")
         }
     }
 }

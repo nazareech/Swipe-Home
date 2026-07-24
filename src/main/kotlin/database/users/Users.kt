@@ -18,6 +18,7 @@ object Users: Table("users") {
     val phone = varchar("phone", 25)
     val is_verified_owner = bool("is_verified_owner")
     val is_admin = bool("is_admin")
+    val created_at = timestampWithTimeZone("created_at").clientDefault { OffsetDateTime.now() }
     val last_seen = timestampWithTimeZone("last_seen").clientDefault { OffsetDateTime.now() }
 
     override val primaryKey = PrimaryKey(id_user)
@@ -53,6 +54,7 @@ object Users: Table("users") {
                     phone = it[Users.phone],
                     is_verified_owner = it[Users.is_verified_owner],
                     is_admin = it[Users.is_admin],
+                    created_at = (it[Users.created_at]).toString(),
                     last_seen = it[Users.last_seen].toString()
                 )
             }

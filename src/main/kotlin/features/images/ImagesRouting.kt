@@ -4,6 +4,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticFiles
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.post
+import io.ktor.server.routing.put
 import io.ktor.server.routing.routing
 import java.io.File
 
@@ -18,6 +19,11 @@ fun Application.configureImagesRouting() {
         delete("/properties/images/{id_image}") {
             val controller = ImagesController(call)
             controller.deleteImage()
+        }
+
+        put("/properties/images/{id_property}/{id_new_image}") {
+            val controller = ImagesController(call)
+            controller.changeMainImage()
         }
 
         // Ендпоінт для роздачі фотографій з сервера клієнтам
