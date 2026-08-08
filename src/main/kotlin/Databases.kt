@@ -12,6 +12,7 @@ import com.swipehome.database.properties.PropertyImages
 import com.swipehome.database.swipes.Swipes
 import com.swipehome.database.chats.Chats
 import com.swipehome.database.chats.Messages
+import com.swipehome.database.dao.PasswordResets
 
 fun Application.configureDatabases() {
     Database.connect(
@@ -30,7 +31,8 @@ fun Application.configureDatabases() {
             PropertyImages,
             Swipes,
             Chats,
-            Messages
+            Messages,
+            PasswordResets
         )
     }
 

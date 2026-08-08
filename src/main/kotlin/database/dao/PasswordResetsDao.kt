@@ -54,7 +54,28 @@ object PasswordResetsDao {
                 if (currentTime.toInstant().isBefore(expiredAt.toInstant())) {
                     // Код вірний! Одразу видаляємо його, щоб не можна було вписати двічі
                     PasswordResets.deleteWhere {
-                        PasswordResets.id_passwd_reset eq resetRecord[PasswordResets.id_passwd_reset] }
+                        PasswordResets.id_passwd_reset eq resetRecord[PasswordResets.id_passwd_reset]
+                    }
+                    return@transaction true
+                }
+            }
+            false
+        }
+    }
+
+    fun isCodeValidOnly(userId: Int?, code: Int?): Boolean{
+        if (userId == null || code == null) return false
+
+        return transaction {
+            val resetRecord = PasswordResets.selectAll()
+                .where { (PasswordResets.reset_code eq code) and (PasswordResets.id_user eq userId) }
+                .singleOrNull()
+
+            if (resetRecord != null){
+                val expiredAt = resetRecord[PasswordResets.expired_at]
+                val currentTime = OffsetDateTime.now(ZoneOffset.UTC)
+
+                if (currentTime.toInstant().isBefore(expiredAt.toInstant())){
                     return@transaction true
                 }
             }

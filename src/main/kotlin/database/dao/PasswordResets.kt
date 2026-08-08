@@ -30,9 +30,6 @@ object PasswordResets : Table("password_resets") {
         // Час дії - 15 хвилин від поточного моменту
         val expirationTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(15)
 
-        // Беремо поточний час у мілісекундах + 15 хвилин (в мілісекундах)
-//        val expirationTime = System.currentTimeMillis() + (15 * 60 * 1000)
-
         return transaction {
             val resaltOperation = PasswordResets.insert {
                 it[id_user] = userId

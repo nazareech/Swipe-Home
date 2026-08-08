@@ -1,6 +1,6 @@
 package com.swipehome.cache
 
-import com.swipehome.features.autorization.register.RegisterReceivedRemote
+import com.swipehome.features.autorization.RegisterReceivedRemote
 data class TokenCache(
     val login: String,
     val token: String

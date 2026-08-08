@@ -6,6 +6,25 @@ import io.ktor.server.routing.routing
 
 fun Application.configureAuthRouting() {
     routing {
+
+        //================== Реєстрація ==================
+        post("/register"){
+            val registerController = AuthController(call)
+            registerController.registerNewUser()
+        }
+
+        //================== Логування ==================
+        post("/login"){
+            val loginController = AuthController(call)
+            loginController.performLogin()
+        }
+
+        post("/logout"){
+            val loginController = AuthController(call)
+            loginController.performLogout()
+        }
+
+        //================== Відновлення пароля ==================
         post("/auth/forgot-password") {
             val controller = AuthController(call)
             controller.forgotPassword()
@@ -13,6 +32,7 @@ fun Application.configureAuthRouting() {
 
         post("/auth/verify-code") {
             val controller = AuthController(call)
+            controller.verifyResetCode()
         }
 
         post("/auth/reset-password") {
