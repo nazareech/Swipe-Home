@@ -28,6 +28,10 @@ dependencies {
 
     implementation(libs.server.websockets) // Для веб-сокету
 
+    implementation(libs.server.libs.javax.mail) // Утиліта для відправки листів
+
+    implementation(libs.server.dotenv.kotlin) // Бібліотека для читання файлів .env
+
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 

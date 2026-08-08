@@ -1,6 +1,7 @@
 package com.swipehome.database.chats
 
 import com.swipehome.database.users.Users
+import com.swipehome.features.chats.MessageDTO
 import com.swipehome.utils.CryptoUtils
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.Table
@@ -40,12 +41,12 @@ object Messages : Table("messages")  {
 
             Messages.selectAll().where { id_message eq newId }.singleOrNull()?.let {
                 MessageDTO(
-                    id_message = it[Messages.id_message],
-                    id_chat = it[Messages.id_chat],
-                    id_sender = it[Messages.id_sender],
+                    id_message = it[id_message],
+                    id_chat = it[id_chat],
+                    id_sender = it[id_sender],
                     // Розшифровуємо повідомлення клієнту
-                    content = CryptoUtils.decrypt(it[Messages.content]),
-                    sent_at = it[Messages.sent_at].toString()
+                    content = CryptoUtils.decrypt(it[content]),
+                    sent_at = it[sent_at].toString()
                 )
             }
         }
@@ -59,11 +60,11 @@ object Messages : Table("messages")  {
                 .orderBy(Messages.sent_at to SortOrder.ASC)
                 .map {
                     MessageDTO(
-                        id_message = it[Messages.id_message],
-                        id_chat = it[Messages.id_chat],
-                        id_sender = it[Messages.id_sender],
-                        content = CryptoUtils.decrypt(it[Messages.content]),
-                        sent_at = it[Messages.sent_at].toString()
+                        id_message = it[id_message],
+                        id_chat = it[id_chat],
+                        id_sender = it[id_sender],
+                        content = CryptoUtils.decrypt(it[content]),
+                        sent_at = it[sent_at].toString()
                     )
                 }
         }

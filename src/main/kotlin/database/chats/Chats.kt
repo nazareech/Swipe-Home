@@ -2,6 +2,7 @@ package com.swipehome.database.chats
 
 import com.swipehome.database.properties.Properties
 import com.swipehome.database.users.Users
+import com.swipehome.features.chats.ChatDTO
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 import org.jetbrains.exposed.v1.jdbc.insert

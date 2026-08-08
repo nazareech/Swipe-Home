@@ -1,13 +1,7 @@
 package com.swipehome.features.chats
 
-import com.swipehome.database.chats.ChatActions
 import com.swipehome.database.chats.Chats
-import com.swipehome.database.chats.CreateChatRequest
-import com.swipehome.database.chats.CreateChatResponse
-import com.swipehome.database.chats.EditMessageRequest
 import com.swipehome.database.chats.Messages
-import com.swipehome.database.chats.SendMessageRequest
-import com.swipehome.database.chats.WsEvent
 import com.swipehome.utils.TokenCheck
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall

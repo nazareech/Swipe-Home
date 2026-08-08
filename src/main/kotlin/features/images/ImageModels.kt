@@ -1,6 +1,5 @@
 package com.swipehome.features.images
 
-import com.swipehome.database.properties.PropertyImageDTO
 import kotlinx.serialization.Serializable
 
 @Serializable

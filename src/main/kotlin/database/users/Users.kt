@@ -13,7 +13,7 @@ object Users: Table("users") {
     val id_user = integer("id_user").autoIncrement()
     val login = varchar("login", 25)
     val username = varchar("username", 30)
-    val password = varchar("password", 25)
+    val password = varchar("password", 255)
     val email = varchar("email", 25)
     val phone = varchar("phone", 25)
     val is_verified_owner = bool("is_verified_owner")
@@ -61,11 +61,43 @@ object Users: Table("users") {
         }
     }
 
+    fun getUserByEmail(searchEmail: String): UserDTO? {
+        return transaction {
+            val resultRow = Users.selectAll().where { Users.email eq searchEmail }.singleOrNull()
+            resultRow?.let {
+                UserDTO(
+                    id_user = it[Users.id_user],
+                    login = it[Users.login],
+                    username = it[Users.username],
+                    password = it[Users.password],
+                    email = it[Users.email],
+                    phone = it[Users.phone],
+                    is_verified_owner = it[Users.is_verified_owner],
+                    is_admin = it[Users.is_admin],
+                    created_at = (it[Users.created_at]).toString(),
+                    last_seen = it[Users.last_seen].toString()
+                )
+            }
+        }
+    }
+
+
     fun updateLastSeen(userId: Int) {
         transaction {
             Users.update ({ Users.id_user eq userId }) {
                 it[last_seen] = OffsetDateTime.now()
             }
+        }
+    }
+
+    fun updatePassword(userId: Int?, newPassword: String): Boolean {
+        if (userId == null) return false
+
+        return transaction {
+            val updatedRows = Users.update({ Users.id_user eq userId }) {
+                it[password] = newPassword
+            }
+            updatedRows > 0
         }
     }
 

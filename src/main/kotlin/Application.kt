@@ -1,10 +1,11 @@
 package com.swipehome
 
+import com.swipehome.features.autorization.configureAuthRouting
 import com.swipehome.features.chats.configureChatsRouting
 import com.swipehome.features.images.configureImagesRouting
-import com.swipehome.features.login.configureLoginRouting
+import com.swipehome.features.autorization.login.configureLoginRouting
 import com.swipehome.features.properties.configurePropertiesRouting
-import com.swipehome.features.register.configureRegisterRouting
+import com.swipehome.features.autorization.register.configureRegisterRouting
 import com.swipehome.features.swipes.configureSwipesRouting
 import io.ktor.server.application.Application
 
@@ -37,4 +38,7 @@ fun Application.rootModule() {
 
     // Налаштування роутингу для чатів
     configureChatsRouting()
+
+    // Налаштування роутингу для зміни пароля
+    configureAuthRouting()
 }

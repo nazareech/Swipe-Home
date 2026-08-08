@@ -22,7 +22,7 @@ class SwipesController(private val call: ApplicationCall) {
             return
         }
 
-        val request = call.receive<SwipeRequest>()
+        val request = call.receive<SwipeModel>()
 
         // Перевіряємо, чи дія дійсно "left" або "right"
         if (request.action != "left" && request.action != "right") {

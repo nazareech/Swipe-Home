@@ -1,5 +1,6 @@
 package com.swipehome.utils
 
+import io.github.cdimascio.dotenv.dotenv
 import java.security.SecureRandom
 import java.util.Base64
 import javax.crypto.Cipher
@@ -7,6 +8,9 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 object CryptoUtils {
+    // Завантажуємо файл .env
+    private val dotenv = dotenv()
+
     private const val CRYPTO_ALGORITHM = "AES/GCM/NoPadding"
     private const val TAG_LENGTH_BIT = 128
     private const val IV_LENGTH_BIT = 12
@@ -14,7 +18,7 @@ object CryptoUtils {
     // Секретний ключ для AES-256 має містити РІВНО 32 байти (32 символи)
     // У реальному проєкті цей ключ НІКОЛИ не зберігають у коді,
     // а беруть зі змінних оточення: System.getenv("AES_SECRET_KEY")
-    private const val MY_SECRET_KEY_STRING = "SwipeHomeSuperSecretKey123456789"
+    private val MY_SECRET_KEY_STRING = dotenv["AES_SECRET_KEY"] ?: throw Exception("Secret key not found in .env")
     private val secretKey = SecretKeySpec(MY_SECRET_KEY_STRING.toByteArray(Charsets.UTF_8), "AES")
 
     // Шифруємо повідомлення

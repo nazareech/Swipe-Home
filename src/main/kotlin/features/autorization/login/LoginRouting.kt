@@ -1,4 +1,4 @@
-package com.swipehome.features.login
+package com.swipehome.features.autorization.login
 
 import io.ktor.server.application.Application
 import io.ktor.server.routing.post

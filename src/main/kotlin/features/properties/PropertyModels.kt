@@ -3,7 +3,7 @@ package com.swipehome.features.properties
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class FetchPropertyRequest (
+data class PropertyModels (
     val limit: Int = 10, // Завантаження по 10 карток
     val offset: Int = 0, // Зсув для наступної партії
 

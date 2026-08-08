@@ -1,4 +1,4 @@
-package com.swipehome.database.chats
+package com.swipehome.features.chats
 
 import com.swipehome.database.users.Users
 import java.util.concurrent.ConcurrentHashMap

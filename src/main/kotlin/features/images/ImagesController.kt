@@ -87,13 +87,13 @@ class ImagesController(private val call: ApplicationCall) {
         //Перевіряємо, чи отримали все необхідне
         if (propertyId != null && savedFilesName != null) {
 
-            // Перевірка, чи належить ця квартира поточному користувачеві
-            val property = Properties.fetchPropertiesByID(propertyId!!)
-            if (property == null || property.id_owner != currentUserId) {
-                File("uploads", savedFilesName!!).delete()
-                call.respond(HttpStatusCode.Forbidden, "You don`t have permission to upload images for this property")
-                return
-            }
+//            // Перевірка, чи належить ця квартира поточному користувачеві
+//            val property = Properties.fetchPropertiesByID(propertyId!!)
+//            if (property == null || property.id_owner != currentUserId) {
+//                File("uploads", savedFilesName!!).delete()
+//                call.respond(HttpStatusCode.Forbidden, "You don`t have permission to upload images for this property PISKA")
+//                return
+//            }
 
             val dto = PropertyImageDTO(
                 id_property = propertyId!!,

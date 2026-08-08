@@ -1,4 +1,4 @@
-package com.swipehome.features.register
+package com.swipehome.features.autorization.register
 
 import kotlinx.serialization.Serializable
 

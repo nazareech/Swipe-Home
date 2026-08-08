@@ -28,7 +28,7 @@ class PropertiesController(private val call: ApplicationCall) {
             return
         }
 
-        val request = call.receive<FetchPropertyRequest>()
+        val request = call.receive<PropertyModels>()
 
         // виклик методу ще не переглянутих оголошень
         val propertyDTOs = Properties.fetchUnswipedProperties(request, validUserId)

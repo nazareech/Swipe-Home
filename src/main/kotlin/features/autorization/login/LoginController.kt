@@ -1,10 +1,10 @@
-package com.swipehome.features.login
+package com.swipehome.features.autorization.login
 
 
 import com.swipehome.database.tokens.TokenDTO
 import com.swipehome.database.tokens.Tokens
 import com.swipehome.database.users.Users
-import com.swipehome.features.register.RegisterResponseRemote
+import com.swipehome.features.autorization.register.RegisterResponseRemote
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive

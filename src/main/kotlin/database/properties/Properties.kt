@@ -3,7 +3,7 @@ package com.swipehome.database.properties
 import com.swipehome.database.properties.models.EditPropertyRequest
 import com.swipehome.database.properties.models.PropertyStatus
 import com.swipehome.database.swipes.Swipes
-import com.swipehome.features.properties.FetchPropertyRequest
+import com.swipehome.features.properties.PropertyModels
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.javatime.timestampWithTimeZone
 import org.jetbrains.exposed.v1.jdbc.*
@@ -61,7 +61,7 @@ object Properties: Table("properties") {
         }
     }
 
-    fun fetchUnswipedProperties(request: FetchPropertyRequest, userID: Int): List<PropertyDTO> {
+    fun fetchUnswipedProperties(request: PropertyModels, userID: Int): List<PropertyDTO> {
         return transaction {
             // Виключаємо вже переклянуті картки
             // шувкаємо id_property, які цей користував вже свайпнув

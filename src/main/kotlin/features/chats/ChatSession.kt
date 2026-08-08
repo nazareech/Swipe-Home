@@ -1,6 +1,5 @@
 package com.swipehome.features.chats
 
-import com.swipehome.database.chats.WsEvent
 import io.ktor.server.websocket.DefaultWebSocketServerSession
 import io.ktor.websocket.Frame
 import kotlinx.serialization.json.Json

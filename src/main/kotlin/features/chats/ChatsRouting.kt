@@ -1,10 +1,7 @@
 package com.swipehome.features.chats
 
-import com.swipehome.database.chats.ChatActions.*
-import com.swipehome.database.chats.ClientWsMessage
-import com.swipehome.database.chats.GlobalConnectionManager
+import com.swipehome.features.chats.ChatActions.*
 import com.swipehome.database.chats.Messages
-import com.swipehome.database.chats.WsEvent
 import com.swipehome.utils.TokenCheck
 import io.ktor.server.application.Application
 import io.ktor.server.routing.delete

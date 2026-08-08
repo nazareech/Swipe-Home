@@ -1,4 +1,4 @@
-package com.swipehome.features.register
+package com.swipehome.features.autorization.register
 
 import com.swipehome.database.tokens.TokenDTO
 import com.swipehome.database.tokens.Tokens
